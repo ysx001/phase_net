@@ -109,11 +109,7 @@ def ifft2c(im, name="ifft2c", do_orthonorm=True):
         im_out = im
         print(im.dtype)
         print(im_out.dtype)
-        if do_orthonorm:
-            fftscale = tf.sqrt(1.0 * im_out.get_shape().as_list()[1] * im_out.get_shape().as_list()[2])
-        else:
-            fftscale = 1.0
-        fftscale = tf.cast(fftscale, dtype=tf.complex64)
+
         if len(im.get_shape()) == 5:
             im_out = tf.transpose(im_out, [0, 3, 4, 1, 2])
             im_out = fftshift(im_out, axis=4)
@@ -126,6 +122,13 @@ def ifft2c(im, name="ifft2c", do_orthonorm=True):
             im_out = tf.transpose(im_out, [2, 0, 1]) 
             im_out = fftshift(im_out, axis=2)
             im_out = fftshift(im_out, axis=1)
+
+        if do_orthonorm:
+            fftscale = tf.sqrt(1.0 * im_out.get_shape().as_list()[-1] * im_out.get_shape().as_list()[-2])
+        else:
+            fftscale = 1.0
+        fftscale = tf.cast(fftscale, dtype=tf.complex64)
+
 
         with tf.device('/gpu:0'):
             # FFT is only supported on the GPU
@@ -150,12 +153,7 @@ def fft2c(im, name="fft2c", do_orthonorm=True):
     "Centered FFT2."
     with tf.name_scope(name):
         im_out = im
-        if do_orthonorm:
-            fftscale = tf.sqrt(1.0 * im_out.get_shape().as_list()[1]
-                               * im_out.get_shape().as_list()[2])
-        else:
-            fftscale = 1.0
-        fftscale = tf.cast(fftscale, dtype=tf.complex64)
+
         if len(im.get_shape()) == 5:
             im_out = tf.transpose(im_out, [0, 3, 4, 1, 2])
             im_out = fftshift(im_out, axis=4)
@@ -168,6 +166,13 @@ def fft2c(im, name="fft2c", do_orthonorm=True):
             im_out = tf.transpose(im_out, [2, 0, 1])
             im_out = fftshift(im_out, axis=2)
             im_out = fftshift(im_out, axis=1) 
+
+        if do_orthonorm: # Todo: and im_out.shape[-1] != None
+            fftscale = tf.sqrt(1.0 * im_out.get_shape().as_list()[-1]
+                               * im_out.get_shape().as_list()[-2])
+        else:
+            fftscale = 1.0
+        fftscale = tf.cast(fftscale, dtype=tf.complex64)
 
         with tf.device('/gpu:0'):
             im_out = tf.fft2d(im_out) / fftscale
